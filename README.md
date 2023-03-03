@@ -3,9 +3,9 @@
 height="42" />
 </a> -->
 
-# WordPress Maestro Module
+# WordPress Tasks Module
+A task system for processing asynchronous tasks with wordpress, the tasks could be one-off long running tasks or periodic tasks.
 
-Maestro Newfold module for WordPress
 
 ## Installation
 
