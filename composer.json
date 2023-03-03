@@ -1,0 +1,52 @@
+{
+  "name": "newfold-labs/wp-module-tasks",
+  "description": "A task system for wordpress, can be used for periodic and one-off tasks",
+  "type": "library",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Amartya Gaur",
+      "email": "amartya.gaur@newfold.com"
+    }
+  ],
+  "repositories": {
+    "newfold": {
+      "type": "composer",
+      "url": "https://newfold-labs.github.io/satis/",
+      "only": [
+        "newfold-labs/*"
+      ]
+    }
+  },
+  "require": {
+    "newfold-labs/wp-module-loader": "^1.0.10"
+  },
+  "require-dev": {
+    "newfold-labs/wp-php-standards": "@stable"
+  },
+  "autoload": {
+    "psr-4": {
+      "NewfoldLabs\\WP\\Module\\Tasks\\": "includes"
+    },
+    "files": [
+      "bootstrap.php"
+    ]
+  },
+  "scripts": {
+    "fix": [
+      "vendor/bin/phpcbf --standard=phpcs.xml ."
+    ],
+    "lint": [
+      "vendor/bin/phpcs --standard=phpcs.xml -s ."
+    ]
+  },
+  "scripts-descriptions": {
+    "fix": "Automatically fix coding standards issues where possible.",
+    "lint": "Check files against coding standards."
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
+}

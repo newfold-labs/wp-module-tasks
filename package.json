@@ -1,0 +1,12 @@
+{
+  "name": "@newfold-labs/wp-module-tasks",
+  "description": "A task system for wordpress, can be used for periodic and one-off tasks",
+  "license": "GPL-2.0-or-later",
+  "private": true,
+  "authors": [
+    {
+      "name": "Amartya Gaur",
+      "email": "amartya.gaur@newfold.com"
+    }
+  ]
+}
