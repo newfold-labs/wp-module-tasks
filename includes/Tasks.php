@@ -3,6 +3,8 @@
 namespace NewfoldLabs\WP\Module\Tasks;
 
 use NewfoldLabs\WP\ModuleLoader\Container;
+use NewfoldLabs\WP\Module\Tasks\Models\Models;
+use NewfoldLabs\WP\Module\Tasks\Scheduler;
 
 /**
  * Tasks's container to initialize the functionality
@@ -25,9 +27,13 @@ class Tasks {
 
 		$this->container = $container;
 
-		if ( is_readable( MODULE_MAESTRO_DIR . '/vendor/autoload.php' ) ) {
-			require_once MODULE_MAESTRO_DIR . '/vendor/autoload.php';
+		if ( is_readable( MODULE_TASKS_DIR . '/vendor/autoload.php' ) ) {
+			require_once MODULE_TASKS_DIR . '/vendor/autoload.php';
 		}
+
+		// Initialize the data models
+		new Models();
+		new Scheduler();
 	}
 
 }
