@@ -59,6 +59,10 @@ class Scheduler {
 			)
 		);
 
+		if ( ! $task_data ) {
+			return;
+		}
+
 		if ( ! function_exists( 'wp_json_encode' ) ) {
 			require_once ABSPATH . 'wp-includes/functions.php';
 		}

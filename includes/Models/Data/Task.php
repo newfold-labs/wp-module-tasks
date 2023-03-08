@@ -3,7 +3,7 @@ namespace NewfoldLabs\WP\Module\Tasks\Models\Data;
 
 /**
  * Tracks and stores a task in the task table.
- * A task will have task_id, task_name, args, task_type, num_retries, interval and enabled as fields
+ * A task will have task_id, task_name, args, num_retries, interval and enabled as fields
  */
 final class Task {
 
@@ -206,24 +206,28 @@ final class Task {
 	/**
 	 * Function to add an arbitrary number of seconds as cron interval.
 	 * To be used in add_filter when setting up the cron
-	 *
-	 * @param array $schedules The existing interval schedules
 	 */
-	public function add_interval_schedule( $schedules ) {
+	public function add_interval_schedule() {
 		$interval = $this->task_interval;
 		$key      = "{$interval}_seconds";
 		$message  = "Once every {$interval} seconds";
 
+		$current_schedules = get_option( 'wp_module_tasks_schedules', array() );
+
+		if ( ! $current_schedules ) {
+			add_option( 'wp_module_tasks_schedules', array() );
+		}
+
 		// Adds the schedule for the given intervals in seconds
-		if ( ! array_key_exists( $key, $schedules ) || $interval !== $schedules[ $key ]['interval'] ) {
-			$schedules[ $key ] = array(
+		if ( ! array_key_exists( $key, $current_schedules ) || $interval !== $current_schedules[ $key ]['interval'] ) {
+			$current_schedules[ $key ] = array(
 				'interval' => $interval,
 				// phpcs:ignore
 				'display'  => $message,
 			);
 		}
 
-		return $schedules;
+		update_option( 'wp_module_tasks_schedules', $current_schedules );
 	}
 
 	/**
@@ -231,14 +235,16 @@ final class Task {
 	 */
 	public function add_periodic_task_as_cron() {
 		// Add the cron schedule
-		add_filter( 'cron_schedules', array( $this, 'add_interval_schedule' ) );
-
-		// Add the executable as cron
-		add_action( "{$this->task_name}_cron", array( $this, 'execute' ) );
+		$this->add_interval_schedule();
 
 		// Register the cron task
-		if ( ! wp_next_scheduled( "{$this->task_name}_cron" ) ) {
-			wp_schedule_event( time(), "{$this->task_interval}_seconds", "{$this->task_name}_cron" );
+		if ( ! wp_next_scheduled( 'task_execution_hook', array( $this->task_id ) ) ) {
+			wp_schedule_event(
+				time(),
+				"{$this->task_interval}_seconds",
+				'task_execution_hook',
+				array( $this->task_id )
+			);
 		}
 	}
 }
