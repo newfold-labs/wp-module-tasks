@@ -20,9 +20,16 @@ class Scheduler {
 
 		add_action( 'scheduler_task_runner', array( $this, 'run_next_task' ) );
 
+		add_action( 'cleanup_tasks', array( $this, 'cleanup' ) );
+
 		// Register the cron task
 		if ( ! wp_next_scheduled( 'scheduler_task_runner' ) ) {
-			wp_schedule_event( time(), 'twenty_seconds', 'scheduler_task_runner' );
+			wp_schedule_event( time(), 'sixty_seconds', 'scheduler_task_runner' );
+		}
+
+		// Register the cleanup task
+		if ( ! wp_next_scheduled( 'cleanup_tasks' ) ) {
+			wp_schedule_event( time(), 'daily', 'cleanup_tasks' );
 		}
 	}
 
@@ -33,9 +40,9 @@ class Scheduler {
 	 */
 	public function add_interval_schedule( $schedules ) {
 		// Adds the schedule for the given intervals in seconds
-		if ( ! array_key_exists( 'twenty_seconds', $schedules ) || 20 !== $schedules[ 'twenty_seconds' ]['interval'] ) {
-			$schedules[ 'twenty_seconds' ] = array(
-				'interval' => 20,
+		if ( ! array_key_exists( 'sixty_seconds', $schedules ) || 60 !== $schedules[ 'sixty_seconds' ]['interval'] ) {
+			$schedules[ 'sixty_seconds' ] = array(
+				'interval' => 60,
 				'display'  => __( 'Cron to run once every twenty seconds' ),
 			);
 		}
@@ -59,7 +66,14 @@ class Scheduler {
 			)
 		);
 
+		// Increase the php execution time
+		ini_set( 'max_execution_time', 300 );
+
 		if ( ! $task_data ) {
+			return;
+		}
+
+		if ( $task_data->task_status === 'processing' ) {
 			return;
 		}
 
@@ -71,13 +85,14 @@ class Scheduler {
 		$task = new Task( $task_data->task_id );
 
 		try {
+			$task->update_task_status( 'processing' );
 			$task->execute();
-			new TaskResult( $task->task_id, $task->task_name, null, null, true );
+			new TaskResult( null, $task->task_id, $task->task_name, null, true );
 		} catch ( \Exception $exception ) {
 			new TaskResult(
+				null,
 				$task->task_id,
 				$task->task_name,
-				null,
 				$exception->getMessage() . $exception->getTraceAsString(),
 				false
 			);
@@ -98,6 +113,43 @@ class Scheduler {
 			// Delete the task irrespective of if it failed or not because we would have already
 			// queued it for retry with another entry if required
 			$task->delete();
+		}
+	}
+
+	/**
+	 * Clean up the task result table and the timed out tasks.
+	 */
+	public function cleanup() {
+		$stuck_tasks = Task::get_timed_out_tasks();
+
+		foreach( $stuck_tasks as $stuck_task ) {
+			$task = new Task( $stuck_task->task_id );
+			new TaskResult(
+				$task->task_id,
+				$task->task_name,
+				null,
+				'task aborted due to timeout',
+				false
+			);
+			if ( $task->num_retries > 1 ) {
+				// Add the task to table again with lower priority
+				new Task(
+					null,
+					$task->task_name,
+					$task->task_executor_path,
+					$task->task_execute,
+					wp_json_encode( $task->args ),
+					$task->num_retries - 1,
+					null,
+					$task->task_priority >= 2 ? $task->task_priority - 1 : 1
+				);
+			}
+		}
+
+		$obsolete_results = TaskResult::get_obsolete_results();
+		foreach ( $obsolete_results as $obsolete_result ) {
+			$task_result = new TaskResult( $obsolete_result->task_result_id );
+			$task_result->delete();
 		}
 	}
 }

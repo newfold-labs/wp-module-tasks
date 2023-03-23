@@ -11,8 +11,7 @@ final class TaskResult {
 	 */
 	public static function setup() {
 		global $wpdb;
-		$table_name      = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
-		$task_table_name = MODULE_TASKS_TASK_TABLE_NAME;
+		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
 
 		// Maybe create the table
 		if ( ! function_exists( 'maybe_create_table' ) ) {
@@ -26,22 +25,23 @@ final class TaskResult {
 			task_name varchar(63) NOT NULL,
 			stacktrace longtext,
 			success tinyint(1),
+			updated TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (task_result_id)
 		) $charset_collate;";
 
-		$created = maybe_create_table( $wpdb->prefix . $table_name, $sql );
+		maybe_create_table( $wpdb->prefix . $table_name, $sql );
 	}
 
 	/**
 	 * The constructor to create the table if not already present
 	 *
+	 * @param int     $task_result_id The task id result if we have to populate the result with an entry from db
 	 * @param int     $task_id        The task id for which we are recording the result
 	 * @param string  $task_name      The task name for which we are recording the result
-	 * @param int     $task_result_id The task id result if we have to populate the result with an entry from db
 	 * @param string  $stacktrace     The stack trace for the error
 	 * @param boolean $success        If the task was successfully executed or not
 	 */
-	public function __construct( $task_id, $task_name, $task_result_id = null, $stacktrace = null, $success = null ) {
+	public function __construct( $task_result_id, $task_id = null, $task_name = null, $stacktrace = null, $success = null ) {
 
 		global $wpdb;
 		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
@@ -54,7 +54,7 @@ final class TaskResult {
 
 		if ( ! $task_result_id ) {
 			// Create an entry
-			$inserted             = $wpdb->insert(
+			$wpdb->insert(
 				$wpdb->prefix . $table_name,
 				array(
 					'task_id'    => $task_id,
@@ -74,6 +74,30 @@ final class TaskResult {
 			$this->task_name      = $task_result->task_name;
 			$this->stacktrace     = $task_result->stacktrace;
 			$this->success        = $task_result->success;
+			$this->updated        = $task_result->updated;
 		}
+	}
+
+	/**
+	 * Function to get the task results which are way too old
+	 */
+	public static function get_obsolete_results() {
+		global $wpdb;
+		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
+
+		// Get the tasks with processing status and updated more than 2 hours
+		$stuck_tasks = $wpdb->get_result(
+			'SELECT * FROM ' . $wpdb->prefix . $table_name .' WHERE updated < DATE_SUB(NOW(), INTERVAL 24 HOUR)'
+		);
+
+		return $stuck_tasks;
+	}
+
+	/**
+	 * A function that deletes any given task result
+	 */
+	public function delete() {
+		global $wpdb;
+		$wpdb->delete( $wpdb->prefix . MODULE_TASKS_TASK_RESULTS_TABLE_NAME, array( 'task_result_id' => $this->task_result_id ) );
 	}
 }

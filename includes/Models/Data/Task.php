@@ -71,6 +71,21 @@ final class Task {
 	public $task_execute;
 
 	/**
+	 * The task status, should be one of queued, processing, and finished.
+	 * Defaults to queued.
+	 *
+	 * @var string
+	 */
+	public $task_status;
+
+	/**
+	 * Updated timestamp
+	 *
+	 * @var datetime
+	 */
+	public $updated;
+
+	/**
 	 * Make a setup function to be only run when we activate the plugin
 	 */
 	public static function setup() {
@@ -92,11 +107,13 @@ final class Task {
 			num_retries int(2) UNSIGNED,
 			task_interval int(2) UNSIGNED,
 			task_priority int(2) UNSIGNED,
+			task_status varchar(12),
+			updated TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
 			enabled tinyint(1),
 			PRIMARY KEY  (task_id)
 		) $charset_collate;";
 
-		$created = maybe_create_table( $wpdb->prefix . $table_name, $sql );
+		maybe_create_table( $wpdb->prefix . $table_name, $sql );
 	}
 
 	/**
@@ -146,7 +163,7 @@ final class Task {
 
 		if ( ! $id ) {
 			// Create an entry
-			$inserted      = $wpdb->insert(
+			$wpdb->insert(
 				$wpdb->prefix . $table_name,
 				array(
 					'task_name'          => $task_name,
@@ -157,9 +174,11 @@ final class Task {
 					'task_interval'      => $task_interval,
 					'task_priority'      => $task_priority,
 					'enabled'            => $enabled ? 1 : 0,
+					'task_status'        => 'queued',
 				)
 			);
-			$this->task_id = $wpdb->insert_id;
+			$this->task_id     = $wpdb->insert_id;
+			$this->task_status = 'queued';
 
 			// If the task is periodic, just add the filter for WordPress cron to pick it up
 			if ( $this->task_interval ) {
@@ -176,20 +195,28 @@ final class Task {
 			$this->task_name          = $task->task_name;
 			$this->task_executor_path = $task->task_executor_path;
 			$this->task_execute       = $task->task_execute;
-			$this->args               = json_decode( $task->args );
+			$this->args               = json_decode( $task->args, true );
 			$this->num_retries        = $task->num_retries;
 			$this->task_interval      = $task->task_interval;
 			$this->task_priority      = $task->task_priority;
 			$this->enabled            = 1 === $task->enabled;
+			$this->task_status        = $task->task_status;
+			$this->updated            = $task->updated;
 		}
 	}
 
 	/**
 	 * Add a test execute function. Only usable for one-off tasks
+	 *
+	 * @throws \Exception Exception when we cannot find the task executable.
 	 */
 	public function execute() {
 		if ( ! function_exists( $this->task_execute ) ) {
 			require_once $this->task_executor_path;
+		}
+
+		if ( ! function_exists( $this->task_execute ) ) {
+			throw new \Exception( 'Unable to load task' );
 		}
 
 		( $this->task_execute )( $this->args );
@@ -228,6 +255,41 @@ final class Task {
 		}
 
 		update_option( 'wp_module_tasks_schedules', $current_schedules );
+	}
+
+	/**
+	 * Function to update the task's status
+	 *
+	 * @param string $status One of queued, processing, and finished.
+	 */
+	public function update_task_status( $status ) {
+		global $wpdb;
+		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
+
+		if ( ! in_array( $status, array( 'processing', 'queued', 'finished' ), true ) ) {
+			return;
+		}
+
+		$wpdb->update(
+			$wpdb->prefix . $table_name,
+			array( 'task_status' => $status ),
+			array( 'task_id' => $this->task_id )
+		);
+	}
+
+	/**
+	 * Function to get the tasks which are in processing state for quite some time
+	 */
+	public static function get_timed_out_tasks() {
+		global $wpdb;
+		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
+
+		// Get the tasks with processing status and updated more than 2 hours
+		$stuck_tasks = $wpdb->get_result(
+			'SELECT * FROM ' . $wpdb->prefix . $table_name . ' WHERE task_status = `processing` updated < DATE_SUB(NOW(), INTERVAL 2 HOUR)'
+		);
+
+		return $stuck_tasks;
 	}
 
 	/**
