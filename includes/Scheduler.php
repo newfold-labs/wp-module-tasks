@@ -146,10 +146,6 @@ class Scheduler {
 			}
 		}
 
-		$obsolete_results = TaskResult::get_obsolete_results();
-		foreach ( $obsolete_results as $obsolete_result ) {
-			$task_result = new TaskResult( $obsolete_result->task_result_id );
-			$task_result->delete();
-		}
+		TaskResult::delete_obsolete_results();
 	}
 }

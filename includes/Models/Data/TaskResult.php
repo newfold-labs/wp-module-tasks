@@ -79,18 +79,18 @@ final class TaskResult {
 	}
 
 	/**
-	 * Function to get the task results which are way too old
+	 * Function to delete the task results which are way too old
 	 */
-	public static function get_obsolete_results() {
+	public static function delete_obsolete_results() {
 		global $wpdb;
 		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
 
 		// Get the tasks with processing status and updated more than 2 hours
-		$stuck_tasks = $wpdb->get_result(
-			'SELECT * FROM ' . $wpdb->prefix . $table_name .' WHERE updated < DATE_SUB(NOW(), INTERVAL 24 HOUR)'
+		$result = $wpdb->query(
+			'DELETE FROM ' . $wpdb->prefix . $table_name .' WHERE updated < DATE_SUB(NOW(), INTERVAL 24 HOUR)'
 		);
 
-		return $stuck_tasks;
+		return $result;
 	}
 
 	/**
