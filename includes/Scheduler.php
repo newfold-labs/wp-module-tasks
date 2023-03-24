@@ -29,7 +29,7 @@ class Scheduler {
 
 		// Register the cleanup task
 		if ( ! wp_next_scheduled( 'cleanup_tasks' ) ) {
-			wp_schedule_event( time(), 'daily', 'cleanup_tasks' );
+			wp_schedule_event( time(), 'hourly', 'cleanup_tasks' );
 		}
 	}
 
