@@ -278,6 +278,22 @@ final class Task {
 	}
 
 	/**
+	 * Function to get all the tasks with a given task name
+	 *
+	 * @param string $task_name The task name
+	 */
+	public static function get_tasks_with_name( $task_name ) {
+		global $wpdb;
+		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
+
+		$required_tasks = $wpdb->get_results(
+			'SELECT * FROM ' . $wpdb->prefix . $table_name . ' WHERE task_name = \'' . $task_name . '\''
+		);
+
+		return $required_tasks;
+	}
+
+	/**
 	 * Function to get the tasks which are in processing state for quite some time
 	 */
 	public static function get_timed_out_tasks() {
@@ -285,8 +301,8 @@ final class Task {
 		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
 
 		// Get the tasks with processing status and updated more than 2 hours
-		$stuck_tasks = $wpdb->get_result(
-			'SELECT * FROM ' . $wpdb->prefix . $table_name . ' WHERE task_status = `processing` updated < DATE_SUB(NOW(), INTERVAL 2 HOUR)'
+		$stuck_tasks = $wpdb->get_results(
+			'SELECT * FROM ' . $wpdb->prefix . $table_name . ' WHERE task_status = \'processing\' AND updated < DATE_SUB(NOW(), INTERVAL 10 MINUTE)'
 		);
 
 		return $stuck_tasks;

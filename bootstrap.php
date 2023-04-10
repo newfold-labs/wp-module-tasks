@@ -20,11 +20,11 @@ if ( function_exists( 'add_action' ) ) {
 			}
 
 			if ( ! defined( 'MODULE_TASKS_TASK_TABLE_NAME' ) ) {
-				define( 'MODULE_TASKS_TASK_TABLE_NAME', 'tasks' );
+				define( 'MODULE_TASKS_TASK_TABLE_NAME', 'nfd_tasks' );
 			}
 
 			if ( ! defined( 'MODULE_TASKS_TASK_RESULTS_TABLE_NAME' ) ) {
-				define( 'MODULE_TASKS_TASK_RESULTS_TABLE_NAME', 'task_results' );
+				define( 'MODULE_TASKS_TASK_RESULTS_TABLE_NAME', 'nfd_task_results' );
 			}
 
 			register(

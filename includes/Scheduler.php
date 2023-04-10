@@ -24,12 +24,12 @@ class Scheduler {
 
 		// Register the cron task
 		if ( ! wp_next_scheduled( 'scheduler_task_runner' ) ) {
-			wp_schedule_event( time(), 'sixty_seconds', 'scheduler_task_runner' );
+			wp_schedule_event( time(), 'twenty_seconds', 'scheduler_task_runner' );
 		}
 
 		// Register the cleanup task
 		if ( ! wp_next_scheduled( 'cleanup_tasks' ) ) {
-			wp_schedule_event( time(), 'hourly', 'cleanup_tasks' );
+			wp_schedule_event( time(), 'ten_minutes', 'cleanup_tasks' );
 		}
 	}
 
@@ -40,10 +40,18 @@ class Scheduler {
 	 */
 	public function add_interval_schedule( $schedules ) {
 		// Adds the schedule for the given intervals in seconds
-		if ( ! array_key_exists( 'sixty_seconds', $schedules ) || 60 !== $schedules[ 'sixty_seconds' ]['interval'] ) {
-			$schedules[ 'sixty_seconds' ] = array(
-				'interval' => 60,
+		if ( ! array_key_exists( 'twenty_seconds', $schedules ) || 20 !== $schedules[ 'twenty_seconds' ]['interval'] ) {
+			$schedules[ 'twenty_seconds' ] = array(
+				'interval' => 20,
 				'display'  => __( 'Cron to run once every twenty seconds' ),
+			);
+		}
+
+		// Adds the schedule for the given intervals in seconds
+		if ( ! array_key_exists( 'ten_minutes', $schedules ) || 600 !== $schedules[ 'ten_minutes' ]['interval'] ) {
+			$schedules[ 'ten_minutes' ] = array(
+				'interval' => 600,
+				'display'  => __( 'Cron to run once every ten minutes' ),
 			);
 		}
 
@@ -103,7 +111,7 @@ class Scheduler {
 					$task->task_name,
 					$task->task_executor_path,
 					$task->task_execute,
-					wp_json_encode( $task->args ),
+					$task->args,
 					$task->num_retries - 1,
 					null,
 					$task->task_priority >= 2 ? $task->task_priority - 1 : 1
@@ -124,11 +132,12 @@ class Scheduler {
 
 		foreach( $stuck_tasks as $stuck_task ) {
 			$task = new Task( $stuck_task->task_id );
+			// Mark the task as failed
 			new TaskResult(
+				null,
 				$task->task_id,
 				$task->task_name,
-				null,
-				'task aborted due to timeout',
+				'Task aborted due to timeout',
 				false
 			);
 			if ( $task->num_retries > 1 ) {
@@ -138,12 +147,13 @@ class Scheduler {
 					$task->task_name,
 					$task->task_executor_path,
 					$task->task_execute,
-					wp_json_encode( $task->args ),
+					$task->args,
 					$task->num_retries - 1,
 					null,
 					$task->task_priority >= 2 ? $task->task_priority - 1 : 1
 				);
 			}
+			$task->delete();
 		}
 
 		TaskResult::delete_obsolete_results();
