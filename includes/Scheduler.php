@@ -74,8 +74,8 @@ class Scheduler {
 			)
 		);
 
-		// Increase the php execution time
-		ini_set( 'max_execution_time', 300 );
+		// Increase the php execution time to 5 minutes
+		set_time_limit( 240 );
 
 		if ( ! $task_data ) {
 			return;
