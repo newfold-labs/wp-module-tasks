@@ -100,4 +100,60 @@ final class TaskResult {
 		global $wpdb;
 		$wpdb->delete( $wpdb->prefix . MODULE_TASKS_TASK_RESULTS_TABLE_NAME, array( 'task_result_id' => $this->task_result_id ) );
 	}
+
+	/**
+	 * Get failed tasks with task name
+	 *
+	 * @param string $task_name The task name to get the failed results for
+	 */
+	public static function get_failed_tasks_by_name( $task_name ) {
+		global $wpdb;
+		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
+
+		// Get the tasks with processing status and updated more than 2 hours
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				// phpcs:ignore
+				"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_name = %s AND  success = 0", $task_name
+			)
+		);
+
+		return $results;
+	}
+
+	/**
+	 * Get succeeded tasks with task name
+	 *
+	 * @param string $task_name The task name to get the succeeded tasks for
+	 */
+	public static function get_succeeded_tasks_by_name( $task_name ) {
+		global $wpdb;
+		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
+
+		// Get the tasks with processing status and updated more than 2 hours
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				// phpcs:ignore
+				"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_name = %s AND  success = 1", $task_name
+			)
+		);
+
+		return $results;
+	}
+
+	/**
+	 * A function to get all failed tasks
+	 */
+	public static function get_failed_tasks() {
+		global $wpdb;
+		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
+
+		// Get the tasks with processing status and updated more than 2 hours
+		$results = $wpdb->get_results(
+			// phpcs:ignore
+			"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE success = 0"
+		);
+
+		return $results;
+	}
 }

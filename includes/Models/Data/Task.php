@@ -287,7 +287,10 @@ final class Task {
 		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
 
 		$required_tasks = $wpdb->get_results(
-			'SELECT * FROM ' . $wpdb->prefix . $table_name . ' WHERE task_name = \'' . $task_name . '\''
+			$wpdb->prepare(
+				// phpcs:ignore
+				"select * from `{$wpdb->prefix}{$table_name}` where task_name = %s", $task_name
+			)
 		);
 
 		return $required_tasks;
@@ -302,7 +305,8 @@ final class Task {
 
 		// Get the tasks with processing status and updated more than 2 hours
 		$stuck_tasks = $wpdb->get_results(
-			'SELECT * FROM ' . $wpdb->prefix . $table_name . ' WHERE task_status = \'processing\' AND updated < DATE_SUB(NOW(), INTERVAL 10 MINUTE)'
+			//phpcs:ignore
+			"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_status = \'processing\' AND updated < DATE_SUB(NOW(), INTERVAL 10 MINUTE)"
 		);
 
 		return $stuck_tasks;
