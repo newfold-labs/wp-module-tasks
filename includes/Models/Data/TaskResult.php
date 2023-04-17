@@ -87,7 +87,8 @@ final class TaskResult {
 
 		// Get the tasks with processing status and updated more than 2 hours
 		$result = $wpdb->query(
-			'DELETE FROM ' . $wpdb->prefix . $table_name .' WHERE updated < DATE_SUB(NOW(), INTERVAL 24 HOUR)'
+			// phpcs:ignore
+			"DELETE FROM `{$wpdb->prefix}{$table_name}` WHERE updated < DATE_SUB(NOW(), INTERVAL 24 HOUR)"
 		);
 
 		return $result;
