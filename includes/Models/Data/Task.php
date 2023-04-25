@@ -163,9 +163,7 @@ final class Task {
 	 *
 	 * @param int $id The task id, null by default, only pass it to initialize a task object with id
 	 */
-	public function __construct(
-		$id = null,
-	) {
+	public function __construct( $id = null ) {
 		global $wpdb;
 
 		// Initialize the task attributes

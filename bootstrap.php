@@ -64,11 +64,13 @@ function setup_task_results_table( $table_name ) {
 /**
  * Drop the tables on plugin deactivation
  */
-function purge_tables( $task_table_name, $task_result_table_name ) {
+function purge_tables() {
 	global $wpdb;
 
-	$wpdb->query( "DROP TABLE IF EXISTS `$wpdb->prefix}{$task_table_name}`" );
-	$wpdb->query( "DROP TABLE IF EXISTS `$wpdb->prefix}{$task_result_table_name}`" );
+	// phpcs:ignore
+	$wpdb->query( "DROP TABLE IF EXISTS `$wpdb->prefix}nfd_tasks`" );
+	// phpcs:ignore
+	$wpdb->query( "DROP TABLE IF EXISTS `$wpdb->prefix}nfd_task_results`" );
 }
 
 if ( function_exists( 'add_action' ) ) {

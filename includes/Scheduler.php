@@ -40,16 +40,16 @@ class Scheduler {
 	 */
 	public function add_interval_schedule( $schedules ) {
 		// Adds the schedule for the given intervals in seconds
-		if ( ! array_key_exists( 'twenty_seconds', $schedules ) || 20 !== $schedules[ 'twenty_seconds' ]['interval'] ) {
-			$schedules[ 'twenty_seconds' ] = array(
+		if ( ! array_key_exists( 'twenty_seconds', $schedules ) || 20 !== $schedules['twenty_seconds']['interval'] ) {
+			$schedules['twenty_seconds'] = array(
 				'interval' => 20,
 				'display'  => __( 'Cron to run once every twenty seconds' ),
 			);
 		}
 
 		// Adds the schedule for the given intervals in seconds
-		if ( ! array_key_exists( 'ten_minutes', $schedules ) || 600 !== $schedules[ 'ten_minutes' ]['interval'] ) {
-			$schedules[ 'ten_minutes' ] = array(
+		if ( ! array_key_exists( 'ten_minutes', $schedules ) || 600 !== $schedules['ten_minutes']['interval'] ) {
+			$schedules['ten_minutes'] = array(
 				'interval' => 600,
 				'display'  => __( 'Cron to run once every ten minutes' ),
 			);
@@ -61,8 +61,8 @@ class Scheduler {
 	/**
 	 * The function to record the result and retry a task on failure
 	 *
-	 * @param $task
-	 * @param $exception
+	 * @param Task       $task      task object to perform the operation for
+	 * @param \Exception $exception exception thrown while executing the task
 	 */
 	private function record_and_requeue( $task, $exception = null ) {
 		if ( ! $exception ) {
@@ -90,15 +90,15 @@ class Scheduler {
 	/**
 	 * Get the tasks, and execute while handling the errors and retires
 	 */
-	public function run_next_task () {
+	public function run_next_task() {
 		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
 
 		// Get the task we need to execute on the bases of priority
 		global $wpdb;
 
 		$task_data = $wpdb->get_row(
-			// phpcs:ignore
 			$wpdb->prepare(
+				// phpcs:ignore
 				"select * from `{$wpdb->prefix}{$table_name}` where task_interval is null order by task_priority desc limit 1"
 			)
 		);
@@ -110,7 +110,7 @@ class Scheduler {
 			return;
 		}
 
-		if ( $task_data->task_status === 'processing' ) {
+		if ( 'processing' === $task_data->task_status ) {
 			return;
 		}
 
@@ -142,7 +142,7 @@ class Scheduler {
 	public function cleanup() {
 		$stuck_tasks = Task::get_timed_out_tasks();
 
-		foreach( $stuck_tasks as $stuck_task ) {
+		foreach ( $stuck_tasks as $stuck_task ) {
 			$task = new Task( $stuck_task->task_id );
 			// Mark the task as failed
 			$this->record_and_requeue( $task );
