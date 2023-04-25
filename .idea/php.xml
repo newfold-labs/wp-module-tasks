@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpIncludePathManager">
+    <include_path>
+      <path value="$PROJECT_DIR$/vendor/phpcompatibility/phpcompatibility-paragonie" />
+      <path value="$PROJECT_DIR$/vendor/phpcompatibility/php-compatibility" />
+      <path value="$PROJECT_DIR$/vendor/phpcompatibility/phpcompatibility-wp" />
+      <path value="$PROJECT_DIR$/vendor/composer" />
+      <path value="$PROJECT_DIR$/vendor/wp-forge/collection" />
+      <path value="$PROJECT_DIR$/vendor/newfold-labs/wp-module-loader" />
+      <path value="$PROJECT_DIR$/vendor/wp-forge/wp-options" />
+      <path value="$PROJECT_DIR$/vendor/newfold-labs/container" />
+      <path value="$PROJECT_DIR$/vendor/wp-forge/fluent" />
+      <path value="$PROJECT_DIR$/vendor/newfold-labs/wp-php-standards" />
+      <path value="$PROJECT_DIR$/vendor/squizlabs/php_codesniffer" />
+      <path value="$PROJECT_DIR$/vendor/dealerdirect/phpcodesniffer-composer-installer" />
+      <path value="$PROJECT_DIR$/vendor/wp-coding-standards/wpcs" />
+      <path value="$USER_HOME$/Local Sites/maestrotest/app/public" />
+    </include_path>
+  </component>
+  <component name="PhpProjectSharedConfiguration" php_language_level="8.1">
+    <option name="suggestChangeDefaultLanguageLevel" value="false" />
+  </component>
+</project>

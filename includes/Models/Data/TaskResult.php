@@ -7,74 +7,113 @@ namespace NewfoldLabs\WP\Module\Tasks\Models\Data;
 final class TaskResult {
 
 	/**
-	 * Make a setup function to be only run when we activate the plugin
+	 * The task result id
+	 *
+	 * @var int
 	 */
-	public static function setup() {
-		global $wpdb;
-		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
+	public $task_result_id;
 
-		// Maybe create the table
-		if ( ! function_exists( 'maybe_create_table' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		}
+	/**
+	 * The task name for which we are storing the result
+	 *
+	 * @var string
+	 */
+	public $task_name;
 
-		$charset_collate = $wpdb->get_charset_collate();
-		$sql             = "CREATE TABLE `{$wpdb->prefix}{$table_name}` (
-			task_result_id bigint(20) NOT NULL AUTO_INCREMENT,
-			task_id bigint(20) NOT NULL,
-			task_name varchar(63) NOT NULL,
-			stacktrace longtext,
-			success tinyint(1),
-			updated TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			PRIMARY KEY  (task_result_id)
-		) $charset_collate;";
+	/**
+	 * Stacktrace in case there was an error while executing the task
+	 *
+	 * @var string
+	 */
+	public $stacktrace;
 
-		maybe_create_table( $wpdb->prefix . $table_name, $sql );
+	/**
+	 * The task run status
+	 *
+	 * @var boolean
+	 */
+	public $success;
+
+	/**
+	 * The updated timestamp for a task result
+	 *
+	 * @var datetime
+	 */
+	public $updated;
+
+	/**
+	 * Setter function to assign a task name
+	 *
+	 * @param string $task_name the task name to use
+	 */
+	public function set_task_name( $task_name ) {
+		$this->task_name = $task_name;
+		return $this;
+	}
+
+	/**
+	 * Setter function to set the stacktrace
+	 *
+	 * @param string $stacktrace the stacktrace
+	 */
+	public function set_stacktrace( $stacktrace ) {
+		$this->stacktrace = $stacktrace;
+		return $this;
+	}
+
+	/**
+	 * Setter function to set task status
+	 *
+	 * @param boolean $success the task's status
+	 */
+	public function set_success( $success ) {
+		$this->success = $success;
+		return $this;
 	}
 
 	/**
 	 * The constructor to create the table if not already present
 	 *
-	 * @param int     $task_result_id The task id result if we have to populate the result with an entry from db
-	 * @param int     $task_id        The task id for which we are recording the result
-	 * @param string  $task_name      The task name for which we are recording the result
-	 * @param string  $stacktrace     The stack trace for the error
-	 * @param boolean $success        If the task was successfully executed or not
+	 * @param int $task_result_id The task id result if we have to populate the result with an entry from db
 	 */
-	public function __construct( $task_result_id, $task_id = null, $task_name = null, $stacktrace = null, $success = null ) {
+	public function __construct( $task_result_id = null ) {
 
 		global $wpdb;
 		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
 
-		$this->task_id        = $task_id;
-		$this->task_name      = $task_name;
 		$this->task_result_id = $task_result_id;
-		$this->stacktrace     = $stacktrace;
-		$this->success        = $success;
 
-		if ( ! $task_result_id ) {
-			// Create an entry
-			$wpdb->insert(
-				$wpdb->prefix . $table_name,
-				array(
-					'task_id'    => $task_id,
-					'task_name'  => $task_name,
-					'stacktrace' => $stacktrace,
-					'success'    => $success,
-				)
-			);
-			$this->task_result_id = $wpdb->insert_id;
-		} else {
+		if ( $task_result_id ) {
 			$task_result = $wpdb->get_row(
 				// phpcs:ignore
 				$wpdb->prepare( "select * from `{$wpdb->prefix}{$table_name}` where `task_result_id` = %d", $task_result_id )
 			);
 			$this->task_result_id = $task_result->task_result_id;
-			$this->task_id        = $task_result->task_id;
 			$this->task_name      = $task_result->task_name;
 			$this->stacktrace     = $task_result->stacktrace;
 			$this->success        = $task_result->success;
 			$this->updated        = $task_result->updated;
+		}
+	}
+
+	/**
+	 * Function to insert a task result to db
+	 */
+	public function record_task_result() {
+		global $wpdb;
+		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
+
+		if ( ! $this->task_result_id ) {
+			// Create an entry
+			$wpdb->insert(
+				$wpdb->prefix . $table_name,
+				array(
+					'task_name'  => $this->task_name,
+					'stacktrace' => $this->stacktrace,
+					'success'    => $this->success,
+				)
+			);
+			$this->task_result_id = $wpdb->insert_id;
 		}
 	}
 
