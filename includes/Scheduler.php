@@ -40,16 +40,16 @@ class Scheduler {
 	 */
 	public function add_interval_schedule( $schedules ) {
 		// Adds the schedule for the given intervals in seconds
-		if ( ! array_key_exists( 'twenty_seconds', $schedules ) || 20 !== $schedules[ 'twenty_seconds' ]['interval'] ) {
-			$schedules[ 'twenty_seconds' ] = array(
+		if ( ! array_key_exists( 'twenty_seconds', $schedules ) || 20 !== $schedules['twenty_seconds']['interval'] ) {
+			$schedules['twenty_seconds'] = array(
 				'interval' => 20,
 				'display'  => __( 'Cron to run once every twenty seconds' ),
 			);
 		}
 
 		// Adds the schedule for the given intervals in seconds
-		if ( ! array_key_exists( 'ten_minutes', $schedules ) || 600 !== $schedules[ 'ten_minutes' ]['interval'] ) {
-			$schedules[ 'ten_minutes' ] = array(
+		if ( ! array_key_exists( 'ten_minutes', $schedules ) || 600 !== $schedules['ten_minutes']['interval'] ) {
+			$schedules['ten_minutes'] = array(
 				'interval' => 600,
 				'display'  => __( 'Cron to run once every ten minutes' ),
 			);
@@ -59,29 +59,58 @@ class Scheduler {
 	}
 
 	/**
+	 * The function to record the result and retry a task on failure
+	 *
+	 * @param Task       $task      task object to perform the operation for
+	 * @param \Exception $exception exception thrown while executing the task
+	 */
+	private function record_and_requeue( $task, $exception = null ) {
+		if ( ! $exception ) {
+			$message = 'Task aborted due to timeout';
+		} else {
+			$message = $exception->getMessage() . $exception->getTraceAsString();
+		}
+		$task_result = new TaskResult();
+		$task_result->set_task_name( $task->task_name )
+			->set_stacktrace( $message )
+			->set_success( false );
+		$task_result->record_task_result();
+
+		if ( $task->num_retries > 1 ) {
+			$retry_task = new Task();
+			$retry_task->set_args( $task->args )
+				->set_task_name( $task->task_name )
+				->set_task_execute( $task->task_execute )
+				->set_num_retries( $task->num_retries - 1 )
+				->set_task_priority( $task->task_priority >= 2 ? $task->task_priority - 1 : 1 );
+			$retry_task->queue_task();
+		}
+	}
+
+	/**
 	 * Get the tasks, and execute while handling the errors and retires
 	 */
-	public function run_next_task () {
+	public function run_next_task() {
 		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
 
 		// Get the task we need to execute on the bases of priority
 		global $wpdb;
 
 		$task_data = $wpdb->get_row(
-			// phpcs:ignore
 			$wpdb->prepare(
+				// phpcs:ignore
 				"select * from `{$wpdb->prefix}{$table_name}` where task_interval is null order by task_priority desc limit 1"
 			)
 		);
 
-		// Increase the php execution time
-		ini_set( 'max_execution_time', 300 );
+		// Increase the php execution time to 5 minutes
+		set_time_limit( 240 );
 
 		if ( ! $task_data ) {
 			return;
 		}
 
-		if ( $task_data->task_status === 'processing' ) {
+		if ( 'processing' === $task_data->task_status ) {
 			return;
 		}
 
@@ -95,28 +124,11 @@ class Scheduler {
 		try {
 			$task->update_task_status( 'processing' );
 			$task->execute();
-			new TaskResult( null, $task->task_id, $task->task_name, null, true );
+			$task_result = new TaskResult();
+			$task_result->set_task_name( $task->task_name )->set_success( true );
+			$task_result->record_task_result();
 		} catch ( \Exception $exception ) {
-			new TaskResult(
-				null,
-				$task->task_id,
-				$task->task_name,
-				$exception->getMessage() . $exception->getTraceAsString(),
-				false
-			);
-			if ( $task->num_retries > 1 ) {
-				// Add the task to table again with lower priority
-				new Task(
-					null,
-					$task->task_name,
-					$task->task_executor_path,
-					$task->task_execute,
-					$task->args,
-					$task->num_retries - 1,
-					null,
-					$task->task_priority >= 2 ? $task->task_priority - 1 : 1
-				);
-			}
+			$this->record_and_requeue( $task, $exception );
 		} finally {
 			// Delete the task irrespective of if it failed or not because we would have already
 			// queued it for retry with another entry if required
@@ -130,29 +142,10 @@ class Scheduler {
 	public function cleanup() {
 		$stuck_tasks = Task::get_timed_out_tasks();
 
-		foreach( $stuck_tasks as $stuck_task ) {
+		foreach ( $stuck_tasks as $stuck_task ) {
 			$task = new Task( $stuck_task->task_id );
 			// Mark the task as failed
-			new TaskResult(
-				null,
-				$task->task_id,
-				$task->task_name,
-				'Task aborted due to timeout',
-				false
-			);
-			if ( $task->num_retries > 1 ) {
-				// Add the task to table again with lower priority
-				new Task(
-					null,
-					$task->task_name,
-					$task->task_executor_path,
-					$task->task_execute,
-					$task->args,
-					$task->num_retries - 1,
-					null,
-					$task->task_priority >= 2 ? $task->task_priority - 1 : 1
-				);
-			}
+			$this->record_and_requeue( $task );
 			$task->delete();
 		}
 

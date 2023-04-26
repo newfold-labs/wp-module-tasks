@@ -12,7 +12,7 @@ A task system for processing asynchronous tasks with wordpress, the tasks could 
 ### 1. Add the Newfold Satis to your `composer.json`.
 
  ```bash
- composer config repositories.newfold composer https://newfold.github.io/satis
+ composer config repositories.newfold composer https://newfold-labs.github.io/satis
  ```
 
 ### 2. Require the `newfold-labs/wp-module-tasks` package.
@@ -39,18 +39,15 @@ use NewfoldLabs\WP\Module\Tasks\Models\Data\Task;
 function foo( $args ) {
     // do something.
 }
-
-new Task(
-    null,
-    'foo_task',
-    <path_to_current_foo_executable>,
-    'foo',
-    <args as array>,
-    <num retries>,
-    null,
-    <task priority>
-)
-
+$task = new Task();
+// or use any loaded function like \Class::static_func etc.
+$task->set_task_name('hello')
+    ->set_task_execute('foo')
+    ->set_num_retries(2)
+    ->set_args( $args )
+    ->set_priority( 10 );
+// Queue the task by
+$task->queue_task();
 ```
 
 The scheduler will take up tasks based on the task priority and take care of retries in case the task fails. The scheduler will also be responsible for recording the results for the task runs in a db called `wp_task_results`.
@@ -66,17 +63,12 @@ function foo( $args ) {
     // do something.
 }
 
-new Task(
-    null,
-    'foo_task',
-    <path_to_current_foo_executable>,
-    'foo',
-    <args as array>,
-    null,
-    <task interval in seconds>,
-    null,
-)
-
+$task = new Task();
+$task->set_name('foo_task')
+    ->set_task_execute('foo')
+    ->set_args( $args )
+    ->set_interval(30)
+$task->queue_task();
 ```
 
 ## Caveats

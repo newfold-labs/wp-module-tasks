@@ -57,13 +57,6 @@ final class Task {
 	public $enabled;
 
 	/**
-	 * The task executor path
-	 *
-	 * @var string
-	 */
-	public $task_executor_path;
-
-	/**
 	 * The task executor function
 	 *
 	 * @var string
@@ -86,74 +79,95 @@ final class Task {
 	public $updated;
 
 	/**
-	 * Make a setup function to be only run when we activate the plugin
+	 * Setter function to assign a task name
+	 *
+	 * @param string $task_name the task name to use
 	 */
-	public static function setup() {
-		global $wpdb;
-		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
+	public function set_task_name( $task_name ) {
+		$this->task_name = $task_name;
+		return $this;
+	}
 
-		// Maybe create the table
-		if ( ! function_exists( 'maybe_create_table' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		}
+	/**
+	 * Setter function to set the args
+	 *
+	 * @param array $args the args as an associative array
+	 */
+	public function set_args( $args ) {
+		$this->args = $args;
+		return $this;
+	}
 
-		$charset_collate = $wpdb->get_charset_collate();
-		$sql             = "CREATE TABLE `{$wpdb->prefix}{$table_name}` (
-			task_id bigint(20) NOT NULL AUTO_INCREMENT,
-			task_name varchar(63) NOT NULL,
-			task_executor_path varchar(125),
-			task_execute varchar(125),
-			args longtext,
-			num_retries int(2) UNSIGNED,
-			task_interval int(2) UNSIGNED,
-			task_priority int(2) UNSIGNED,
-			task_status varchar(12),
-			updated TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
-			enabled tinyint(1),
-			PRIMARY KEY  (task_id)
-		) $charset_collate;";
+	/**
+	 * Setter function to set num_retries
+	 *
+	 * @param int $num_retries the number of retries to set for the task
+	 */
+	public function set_num_retries( $num_retries ) {
+		$this->num_retries = $num_retries;
+		return $this;
+	}
 
-		maybe_create_table( $wpdb->prefix . $table_name, $sql );
+	/**
+	 * Setter function to set the task interval
+	 *
+	 * @param int $interval the interval in seconds to use for task, only required for periodic tasks
+	 */
+	public function set_task_interval( $interval ) {
+		$this->task_interval = $interval;
+		return $this;
+	}
+
+	/**
+	 * Setter function to set the task priority
+	 *
+	 * @param int $priority the priority to set for task
+	 */
+	public function set_task_priority( $priority ) {
+		$this->task_priority = $priority;
+		return $this;
+	}
+
+	/**
+	 * Setter function to set task enabled status
+	 *
+	 * @param boolean $enabled the task's enabled status
+	 */
+	public function set_enabled( $enabled ) {
+		$this->enabled = $enabled;
+		return $this;
+	}
+
+	/**
+	 * Setter function to set the task executable
+	 *
+	 * @param string $task_execute the function to run when executing this task
+	 */
+	public function set_task_execute( $task_execute ) {
+		$this->task_execute = $task_execute;
+		return $this;
+	}
+
+	/**
+	 * Set task status
+	 *
+	 * @param string $status one of processing, queued and finished
+	 */
+	public function set_task_status( $status ) {
+		$this->task_status = $status;
+		return $this;
 	}
 
 	/**
 	 * The constructor to create the table if not already present
 	 *
-	 * @param int     $id                 The task id, null by default, only pass it to initialize a task object with id
-	 * @param string  $task_name          The human readable name for the task
-	 * @param string  $task_executor_path The task executor path
-	 * @param string  $task_execute       Function to be executed for the task
-	 * @param array   $args               The arguments to be used while executing the task
-	 * @param int     $num_retries        The number of times we should retry the task, default: 0
-	 * @param int     $task_interval      The interval in seconds task be configured for, defaults to null for one-off tasks
-	 * @param int     $task_priority      The priority for the task execution, higher number means higher priority, can be 2 digits as max, defaults to 1
-	 * @param boolean $enabled            Toggle to enable / disable a task, defaults to true
-	 *
-	 * @throws TaskModuleException Thrown when we encounter an error.
+	 * @param int $id The task id, null by default, only pass it to initialize a task object with id
 	 */
-	public function __construct(
-		$id = null,
-		$task_name = null,
-		$task_executor_path = null,
-		$task_execute = null,
-		$args = null,
-		$num_retries = 0,
-		$task_interval = null,
-		$task_priority = null,
-		$enabled = true
-	) {
+	public function __construct( $id = null ) {
 		global $wpdb;
 
 		// Initialize the task attributes
-		$this->task_id            = $id;
-		$this->task_name          = $task_name;
-		$this->task_executor_path = $task_executor_path;
-		$this->task_execute       = $task_execute;
-		$this->args               = $args;
-		$this->num_retries        = $num_retries;
-		$this->task_interval      = $task_interval;
-		$this->task_priority      = $task_priority;
-		$this->enabled            = $enabled;
+		$this->task_id = $id;
 
 		if ( ! function_exists( 'wp_json_encode' ) ) {
 			require_once ABSPATH . 'wp-includes/functions.php';
@@ -161,20 +175,46 @@ final class Task {
 
 		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
 
-		if ( ! $id ) {
+		if ( $id ) {
+			// Get and populate the task with the required stuff
+			$task = $wpdb->get_row(
+				// phpcs:ignore
+				$wpdb->prepare( "select * from `{$wpdb->prefix}{$table_name}` where `task_id` = %d", $id )
+			);
+			// Populate the task details from what we got
+			$this->task_id       = $task->task_id;
+			$this->task_name     = $task->task_name;
+			$this->task_execute  = $task->task_execute;
+			$this->args          = json_decode( $task->args, true );
+			$this->num_retries   = $task->num_retries;
+			$this->task_interval = $task->task_interval;
+			$this->task_priority = $task->task_priority;
+			$this->enabled       = 1 === $task->enabled;
+			$this->task_status   = $task->task_status;
+			$this->updated       = $task->updated;
+		}
+	}
+
+	/**
+	 * A function to queue a task, this will ensure the db entry for the task
+	 */
+	public function queue_task() {
+		global $wpdb;
+		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
+
+		if ( ! $this->task_id ) {
 			// Create an entry
 			$wpdb->insert(
 				$wpdb->prefix . $table_name,
 				array(
-					'task_name'          => $task_name,
-					'task_executor_path' => $task_executor_path,
-					'task_execute'       => $task_execute,
-					'args'               => wp_json_encode( $args ),
-					'num_retries'        => $num_retries,
-					'task_interval'      => $task_interval,
-					'task_priority'      => $task_priority,
-					'enabled'            => $enabled ? 1 : 0,
-					'task_status'        => 'queued',
+					'task_name'     => $this->task_name,
+					'task_execute'  => $this->task_execute,
+					'args'          => wp_json_encode( $this->args ),
+					'num_retries'   => $this->num_retries,
+					'task_interval' => $this->task_interval,
+					'task_priority' => $this->task_priority || 10,
+					'enabled'       => $this->enabled ? 1 : 0,
+					'task_status'   => 'queued',
 				)
 			);
 			$this->task_id     = $wpdb->insert_id;
@@ -184,24 +224,6 @@ final class Task {
 			if ( $this->task_interval ) {
 				$this->add_periodic_task_as_cron();
 			}
-		} else {
-			// Get and populate the task with the required stuff
-			$task = $wpdb->get_row(
-				// phpcs:ignore
-				$wpdb->prepare( "select * from `{$wpdb->prefix}{$table_name}` where `task_id` = %d", $id )
-			);
-			// Populate the task details from what we got
-			$this->task_id            = $task->task_id;
-			$this->task_name          = $task->task_name;
-			$this->task_executor_path = $task->task_executor_path;
-			$this->task_execute       = $task->task_execute;
-			$this->args               = json_decode( $task->args, true );
-			$this->num_retries        = $task->num_retries;
-			$this->task_interval      = $task->task_interval;
-			$this->task_priority      = $task->task_priority;
-			$this->enabled            = 1 === $task->enabled;
-			$this->task_status        = $task->task_status;
-			$this->updated            = $task->updated;
 		}
 	}
 
@@ -211,15 +233,11 @@ final class Task {
 	 * @throws \Exception Exception when we cannot find the task executable.
 	 */
 	public function execute() {
-		if ( ! function_exists( $this->task_execute ) ) {
-			require_once $this->task_executor_path;
-		}
-
-		if ( ! function_exists( $this->task_execute ) ) {
+		if ( ! is_callable( $this->task_execute ) ) {
 			throw new \Exception( 'Unable to load task' );
 		}
 
-		( $this->task_execute )( $this->args );
+		call_user_func( $this->task_execute, $this->args );
 	}
 
 	/**
@@ -287,7 +305,10 @@ final class Task {
 		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
 
 		$required_tasks = $wpdb->get_results(
-			'SELECT * FROM ' . $wpdb->prefix . $table_name . ' WHERE task_name = \'' . $task_name . '\''
+			$wpdb->prepare(
+				// phpcs:ignore
+				"select * from `{$wpdb->prefix}{$table_name}` where task_name = %s", $task_name
+			)
 		);
 
 		return $required_tasks;
@@ -302,7 +323,8 @@ final class Task {
 
 		// Get the tasks with processing status and updated more than 2 hours
 		$stuck_tasks = $wpdb->get_results(
-			'SELECT * FROM ' . $wpdb->prefix . $table_name . ' WHERE task_status = \'processing\' AND updated < DATE_SUB(NOW(), INTERVAL 10 MINUTE)'
+			//phpcs:ignore
+			"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_status = \'processing\' AND updated < DATE_SUB(NOW(), INTERVAL 10 MINUTE)"
 		);
 
 		return $stuck_tasks;

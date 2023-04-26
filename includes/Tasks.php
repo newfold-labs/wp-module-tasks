@@ -77,8 +77,7 @@ class Tasks {
 		// Add the filter to add executable as a hook
 		add_action( 'task_execution_hook', array( $this, 'execute_periodic_task' ), 10, 1 );
 
-		// Initialize the data models
-		new Models();
+		// Initialize the scheduler
 		new Scheduler();
 	}
 
