@@ -7,7 +7,7 @@ use function NewfoldLabs\WP\ModuleLoader\register;
 /**
  * Add the tables
  */
-function setup_tables() {
+function nfd_tasks_setup_tables() {
 	global $wpdb;
 
 	// Maybe create the table
@@ -30,7 +30,7 @@ function setup_tables() {
 		PRIMARY KEY  (task_id)
 	) $charset_collate;";
 
-	maybe_create_table( $wpdb->prefix . $table_name, $sql );
+	maybe_create_table( "{$wpdb->prefix}nfd_tasks", $sql );
 
 	$sql = "CREATE TABLE `{$wpdb->prefix}nfd_task_results` (
 		task_result_id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -41,22 +41,21 @@ function setup_tables() {
 		PRIMARY KEY  (task_result_id)
 	) $charset_collate;";
 
-	maybe_create_table( $wpdb->prefix . $table_name, $sql );
+	maybe_create_table( "{$wpdb->prefix}nfd_task_results", $sql );
 }
 
 
 /**
  * Drop the tables on plugin deactivation
  */
-function purge_tables() {
+function nfd_tasks_purge_tables() {
 	global $wpdb;
 
-	$wpdb->query( "DROP TABLE IF EXISTS `$wpdb->prefix}nfd_tasks`" );
-	$wpdb->query( "DROP TABLE IF EXISTS `$wpdb->prefix}nfd_task_results`" );
+	$wpdb->query( "DROP TABLE IF EXISTS `{$wpdb->prefix}nfd_tasks`" );
+	$wpdb->query( "DROP TABLE IF EXISTS `{$wpdb->prefix}nfd_task_results`" );
 }
 
 if ( function_exists( 'add_action' ) ) {
-
 	add_action(
 		'plugins_loaded',
 		function () {
@@ -73,9 +72,6 @@ if ( function_exists( 'add_action' ) ) {
 			if ( ! defined( 'NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME' ) ) {
 				define( 'NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME', 'nfd_task_results' );
 			}
-
-			register_deactivation_hook( __FILE__, 'purge_tables' );
-			register_activation_hook( __FILE__, 'setup_tables' );
 
 			register(
 				[
