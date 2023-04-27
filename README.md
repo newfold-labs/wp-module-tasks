@@ -29,6 +29,14 @@ The system intends to support one-off and periodic tasks.
 <br />
 One-off tasks will be the long running tasks which will be executed by the system in background in an asynchronous manner, these tasks will be picked up according to the priority assigned to them, results will be recorded and then the tasks will subsequently be removed from the system, i.e. we will not be tracking these tasks again unless they are inserted back with other parameters. Some examples of tasks like these could be packaging wordpress related items, sending emails, installing a plugin, updating a plugin, bulk installs, bulk updates etc.
 
+### Setting up the module
+In order for the module to work, we'd need tables for storing the tasks queue and the task results, please use the following functions in order to automatically create / delete the tables while activating and deactivating the plugin.
+
+```php
+register_activation_hook( __FILE__, 'nfd_tasks_setup_tables' );
+register_deactivation_hook( __FILE__, 'nfd_tasks_purge_tables' );
+```
+
 ### Adding a one-off task.
 
 After you include the module as a dependency in your plugin, you can then schedule a one-off task for a function `foo` to be run as below:
