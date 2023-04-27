@@ -154,7 +154,8 @@ final class TaskResult {
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_name = %s AND  success = 0", $task_name
+				"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_name = %s AND  success = 0",
+				$task_name
 			)
 		);
 
@@ -174,7 +175,8 @@ final class TaskResult {
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_name = %s AND  success = 1", $task_name
+				"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_name = %s AND  success = 1",
+				$task_name
 			)
 		);
 
