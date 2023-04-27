@@ -78,10 +78,6 @@ if ( function_exists( 'add_action' ) ) {
 				define( 'NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME', 'nfd_task_results' );
 			}
 
-			// Make the table setup calls
-			setup_task_table( NFD_MODULE_TASKS_TASK_TABLE_NAME );
-			setup_task_results_table( NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME );
-
 			register_deactivation_hook( __FILE__, 'purge_tables' );
 			register_activation_hook( __FILE__, 'setup_tables' );
 
