@@ -34,7 +34,7 @@ One-off tasks will be the long running tasks which will be executed by the syste
 After you include the module as a dependency in your plugin, you can then schedule a one-off task for a function `foo` to be run as below:
 
 ```php
-use NewfoldLabs\WP\Module\Tasks\Models\Data\Task;
+use NewfoldLabs\WP\Module\Tasks\Models\Task;
 
 function foo( $args ) {
     // do something.
@@ -57,7 +57,7 @@ The scheduler will take up tasks based on the task priority and take care of ret
 The installation and including of the module works the same as in the case of one-off tasks, we can add periodic tasks very similar to how we add a one-off task, only difference is in the parameters we pass while creating that module like so:
 
 ```php
-use NewfoldLabs\WP\Module\Tasks\Models\Data\Task;
+use NewfoldLabs\WP\Module\Tasks\Models\Task;
 
 function foo( $args ) {
     // do something.
