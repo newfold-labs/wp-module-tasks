@@ -5,11 +5,9 @@ use NewfoldLabs\WP\ModuleLoader\Container;
 use function NewfoldLabs\WP\ModuleLoader\register;
 
 /**
- * Add the task table
- *
- * @param string $table_name The table name to be used for tasks
+ * Add the tables
  */
-function setup_task_table( $table_name ) {
+function setup_tables() {
 	global $wpdb;
 
 	// Maybe create the table
@@ -18,7 +16,7 @@ function setup_task_table( $table_name ) {
 	}
 
 	$charset_collate = $wpdb->get_charset_collate();
-	$sql             = "CREATE TABLE `{$wpdb->prefix}{$table_name}` (
+	$sql             = "CREATE TABLE `{$wpdb->prefix}nfd_tasks` (
 		task_id bigint(20) NOT NULL AUTO_INCREMENT,
 		task_name varchar(63) NOT NULL,
 		task_execute varchar(125),
@@ -33,23 +31,8 @@ function setup_task_table( $table_name ) {
 	) $charset_collate;";
 
 	maybe_create_table( $wpdb->prefix . $table_name, $sql );
-}
 
-/**
- * Add the task results table
- *
- * @param string $table_name The table name to be used for task results
- */
-function setup_task_results_table( $table_name ) {
-	global $wpdb;
-
-	// Maybe create the table
-	if ( ! function_exists( 'maybe_create_table' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-	}
-
-	$charset_collate = $wpdb->get_charset_collate();
-	$sql             = "CREATE TABLE `{$wpdb->prefix}{$table_name}` (
+	$sql = "CREATE TABLE `{$wpdb->prefix}nfd_task_results` (
 		task_result_id bigint(20) NOT NULL AUTO_INCREMENT,
 		task_name varchar(63) NOT NULL,
 		stacktrace longtext,
@@ -61,15 +44,14 @@ function setup_task_results_table( $table_name ) {
 	maybe_create_table( $wpdb->prefix . $table_name, $sql );
 }
 
+
 /**
  * Drop the tables on plugin deactivation
  */
 function purge_tables() {
 	global $wpdb;
 
-	// phpcs:ignore
 	$wpdb->query( "DROP TABLE IF EXISTS `$wpdb->prefix}nfd_tasks`" );
-	// phpcs:ignore
 	$wpdb->query( "DROP TABLE IF EXISTS `$wpdb->prefix}nfd_task_results`" );
 }
 
@@ -80,27 +62,24 @@ if ( function_exists( 'add_action' ) ) {
 		function () {
 
 			// Set Global Constants
-			if ( ! defined( 'MODULE_TASKS_VERSION' ) ) {
-				define( 'MODULE_TASKS_VERSION', '0.0.1' );
+			if ( ! defined( 'NFD_MODULE_TASKS_VERSION' ) ) {
+				define( 'NFD_MODULE_TASKS_VERSION', '0.0.1' );
 			}
 
-			if ( ! defined( 'MODULE_TASKS_DIR' ) ) {
-				define( 'MODULE_TASKS_DIR', __DIR__ );
+			if ( ! defined( 'NFD_MODULE_TASKS_DIR' ) ) {
+				define( 'NFD_MODULE_TASKS_DIR', __DIR__ );
 			}
 
-			if ( ! defined( 'MODULE_TASKS_TASK_TABLE_NAME' ) ) {
-				define( 'MODULE_TASKS_TASK_TABLE_NAME', 'nfd_tasks' );
+			if ( ! defined( 'NFD_MODULE_TASKS_TASK_TABLE_NAME' ) ) {
+				define( 'NFD_MODULE_TASKS_TASK_TABLE_NAME', 'nfd_tasks' );
 			}
 
-			if ( ! defined( 'MODULE_TASKS_TASK_RESULTS_TABLE_NAME' ) ) {
-				define( 'MODULE_TASKS_TASK_RESULTS_TABLE_NAME', 'nfd_task_results' );
+			if ( ! defined( 'NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME' ) ) {
+				define( 'NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME', 'nfd_task_results' );
 			}
-
-			// Make the table setup calls
-			setup_task_table( MODULE_TASKS_TASK_TABLE_NAME );
-			setup_task_results_table( MODULE_TASKS_TASK_RESULTS_TABLE_NAME );
 
 			register_deactivation_hook( __FILE__, 'purge_tables' );
+			register_activation_hook( __FILE__, 'setup_tables' );
 
 			register(
 				[

@@ -1,5 +1,5 @@
 <?php
-namespace NewfoldLabs\WP\Module\Tasks\Models\Data;
+namespace NewfoldLabs\WP\Module\Tasks\Models;
 
 /**
  * Tracks and stores the results for a particular task.
@@ -79,13 +79,13 @@ final class TaskResult {
 	public function __construct( $task_result_id = null ) {
 
 		global $wpdb;
-		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
+		$table_name = NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
 
 		$this->task_result_id = $task_result_id;
 
 		if ( $task_result_id ) {
 			$task_result = $wpdb->get_row(
-				// phpcs:ignore
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$wpdb->prepare( "select * from `{$wpdb->prefix}{$table_name}` where `task_result_id` = %d", $task_result_id )
 			);
 			$this->task_result_id = $task_result->task_result_id;
@@ -101,7 +101,7 @@ final class TaskResult {
 	 */
 	public function record_task_result() {
 		global $wpdb;
-		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
+		$table_name = NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
 
 		if ( ! $this->task_result_id ) {
 			// Create an entry
@@ -122,11 +122,11 @@ final class TaskResult {
 	 */
 	public static function delete_obsolete_results() {
 		global $wpdb;
-		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
+		$table_name = NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
 
 		// Get the tasks with processing status and updated more than 2 hours
 		$result = $wpdb->query(
-			// phpcs:ignore
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"DELETE FROM `{$wpdb->prefix}{$table_name}` WHERE updated < DATE_SUB(NOW(), INTERVAL 24 HOUR)"
 		);
 
@@ -138,7 +138,7 @@ final class TaskResult {
 	 */
 	public function delete() {
 		global $wpdb;
-		$wpdb->delete( $wpdb->prefix . MODULE_TASKS_TASK_RESULTS_TABLE_NAME, array( 'task_result_id' => $this->task_result_id ) );
+		$wpdb->delete( $wpdb->prefix . NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME, array( 'task_result_id' => $this->task_result_id ) );
 	}
 
 	/**
@@ -148,13 +148,14 @@ final class TaskResult {
 	 */
 	public static function get_failed_tasks_by_name( $task_name ) {
 		global $wpdb;
-		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
+		$table_name = NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
 
 		// Get the tasks with processing status and updated more than 2 hours
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
-				// phpcs:ignore
-				"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_name = %s AND  success = 0", $task_name
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_name = %s AND  success = 0",
+				$task_name
 			)
 		);
 
@@ -168,13 +169,14 @@ final class TaskResult {
 	 */
 	public static function get_succeeded_tasks_by_name( $task_name ) {
 		global $wpdb;
-		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
+		$table_name = NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
 
 		// Get the tasks with processing status and updated more than 2 hours
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
-				// phpcs:ignore
-				"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_name = %s AND  success = 1", $task_name
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_name = %s AND  success = 1",
+				$task_name
 			)
 		);
 
@@ -186,11 +188,11 @@ final class TaskResult {
 	 */
 	public static function get_failed_tasks() {
 		global $wpdb;
-		$table_name = MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
+		$table_name = NFD_MODULE_TASKS_TASK_RESULTS_TABLE_NAME;
 
 		// Get the tasks with processing status and updated more than 2 hours
 		$results = $wpdb->get_results(
-			// phpcs:ignore
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE success = 0"
 		);
 

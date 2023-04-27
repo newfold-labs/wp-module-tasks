@@ -3,10 +3,9 @@
 namespace NewfoldLabs\WP\Module\Tasks;
 
 use NewfoldLabs\WP\ModuleLoader\Container;
-use NewfoldLabs\WP\Module\Tasks\Models\Models;
 use NewfoldLabs\WP\Module\Tasks\Scheduler;
-use NewfoldLabs\WP\Module\Tasks\Models\Data\Task;
-use NewfoldLabs\WP\Module\Tasks\Models\Data\TaskResult;
+use NewfoldLabs\WP\Module\Tasks\Models\Task;
+use NewfoldLabs\WP\Module\Tasks\Models\TaskResult;
 
 /**
  * Tasks's container to initialize the functionality
@@ -67,8 +66,8 @@ class Tasks {
 
 		$this->container = $container;
 
-		if ( is_readable( MODULE_TASKS_DIR . '/vendor/autoload.php' ) ) {
-			require_once MODULE_TASKS_DIR . '/vendor/autoload.php';
+		if ( is_readable( NFD_MODULE_TASKS_DIR . '/vendor/autoload.php' ) ) {
+			require_once NFD_MODULE_TASKS_DIR . '/vendor/autoload.php';
 		}
 
 		// Add the filter for syncing custom crons

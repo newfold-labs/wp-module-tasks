@@ -2,8 +2,8 @@
 
 namespace NewfoldLabs\WP\Module\Tasks;
 
-use NewfoldLabs\WP\Module\Tasks\Models\Data\TaskResult;
-use NewfoldLabs\WP\Module\Tasks\Models\Data\Task;
+use NewfoldLabs\WP\Module\Tasks\Models\TaskResult;
+use NewfoldLabs\WP\Module\Tasks\Models\Task;
 
 /**
  * We will be handling the task check and execution from this class.
@@ -91,14 +91,14 @@ class Scheduler {
 	 * Get the tasks, and execute while handling the errors and retires
 	 */
 	public function run_next_task() {
-		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
+		$table_name = NFD_MODULE_TASKS_TASK_TABLE_NAME;
 
 		// Get the task we need to execute on the bases of priority
 		global $wpdb;
 
 		$task_data = $wpdb->get_row(
 			$wpdb->prepare(
-				// phpcs:ignore
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"select * from `{$wpdb->prefix}{$table_name}` where task_interval is null order by task_priority desc limit 1"
 			)
 		);

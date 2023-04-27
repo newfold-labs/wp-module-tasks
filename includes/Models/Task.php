@@ -1,5 +1,5 @@
 <?php
-namespace NewfoldLabs\WP\Module\Tasks\Models\Data;
+namespace NewfoldLabs\WP\Module\Tasks\Models;
 
 /**
  * Tracks and stores a task in the task table.
@@ -173,12 +173,12 @@ final class Task {
 			require_once ABSPATH . 'wp-includes/functions.php';
 		}
 
-		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
+		$table_name = NFD_MODULE_TASKS_TASK_TABLE_NAME;
 
 		if ( $id ) {
 			// Get and populate the task with the required stuff
 			$task = $wpdb->get_row(
-				// phpcs:ignore
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$wpdb->prepare( "select * from `{$wpdb->prefix}{$table_name}` where `task_id` = %d", $id )
 			);
 			// Populate the task details from what we got
@@ -200,7 +200,7 @@ final class Task {
 	 */
 	public function queue_task() {
 		global $wpdb;
-		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
+		$table_name = NFD_MODULE_TASKS_TASK_TABLE_NAME;
 
 		if ( ! $this->task_id ) {
 			// Create an entry
@@ -245,7 +245,7 @@ final class Task {
 	 */
 	public function delete() {
 		global $wpdb;
-		$wpdb->delete( $wpdb->prefix . MODULE_TASKS_TASK_TABLE_NAME, array( 'task_id' => $this->task_id ) );
+		$wpdb->delete( $wpdb->prefix . NFD_MODULE_TASKS_TASK_TABLE_NAME, array( 'task_id' => $this->task_id ) );
 	}
 
 	/**
@@ -267,7 +267,6 @@ final class Task {
 		if ( ! array_key_exists( $key, $current_schedules ) || $interval !== $current_schedules[ $key ]['interval'] ) {
 			$current_schedules[ $key ] = array(
 				'interval' => $interval,
-				// phpcs:ignore
 				'display'  => $message,
 			);
 		}
@@ -282,7 +281,7 @@ final class Task {
 	 */
 	public function update_task_status( $status ) {
 		global $wpdb;
-		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
+		$table_name = NFD_MODULE_TASKS_TASK_TABLE_NAME;
 
 		if ( ! in_array( $status, array( 'processing', 'queued', 'finished' ), true ) ) {
 			return;
@@ -302,12 +301,13 @@ final class Task {
 	 */
 	public static function get_tasks_with_name( $task_name ) {
 		global $wpdb;
-		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
+		$table_name = NFD_MODULE_TASKS_TASK_TABLE_NAME;
 
 		$required_tasks = $wpdb->get_results(
 			$wpdb->prepare(
-				// phpcs:ignore
-				"select * from `{$wpdb->prefix}{$table_name}` where task_name = %s", $task_name
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"select * from `{$wpdb->prefix}{$table_name}` where task_name = %s",
+				$task_name
 			)
 		);
 
@@ -319,11 +319,11 @@ final class Task {
 	 */
 	public static function get_timed_out_tasks() {
 		global $wpdb;
-		$table_name = MODULE_TASKS_TASK_TABLE_NAME;
+		$table_name = NFD_MODULE_TASKS_TASK_TABLE_NAME;
 
 		// Get the tasks with processing status and updated more than 2 hours
 		$stuck_tasks = $wpdb->get_results(
-			//phpcs:ignore
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_status = \'processing\' AND updated < DATE_SUB(NOW(), INTERVAL 10 MINUTE)"
 		);
 
