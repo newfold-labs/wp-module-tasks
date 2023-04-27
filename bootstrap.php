@@ -62,10 +62,6 @@ if ( function_exists( 'add_action' ) ) {
 		function () {
 
 			// Set Global Constants
-			if ( ! defined( 'NFD_MODULE_TASKS_VERSION' ) ) {
-				define( 'NFD_MODULE_TASKS_VERSION', '0.0.1' );
-			}
-
 			if ( ! defined( 'NFD_MODULE_TASKS_DIR' ) ) {
 				define( 'NFD_MODULE_TASKS_DIR', __DIR__ );
 			}
