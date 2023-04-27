@@ -98,6 +98,7 @@ class Scheduler {
 
 		$task_data = $wpdb->get_row(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"select * from `{$wpdb->prefix}{$table_name}` where task_interval is null order by task_priority desc limit 1"
 			)
 		);

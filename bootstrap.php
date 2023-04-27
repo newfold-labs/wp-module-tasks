@@ -32,7 +32,7 @@ function setup_tables() {
 
 	maybe_create_table( $wpdb->prefix . $table_name, $sql );
 
-	$sql             = "CREATE TABLE `{$wpdb->prefix}nfd_task_results` (
+	$sql = "CREATE TABLE `{$wpdb->prefix}nfd_task_results` (
 		task_result_id bigint(20) NOT NULL AUTO_INCREMENT,
 		task_name varchar(63) NOT NULL,
 		stacktrace longtext,

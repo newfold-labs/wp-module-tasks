@@ -85,6 +85,7 @@ final class TaskResult {
 
 		if ( $task_result_id ) {
 			$task_result = $wpdb->get_row(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$wpdb->prepare( "select * from `{$wpdb->prefix}{$table_name}` where `task_result_id` = %d", $task_result_id )
 			);
 			$this->task_result_id = $task_result->task_result_id;
@@ -125,6 +126,7 @@ final class TaskResult {
 
 		// Get the tasks with processing status and updated more than 2 hours
 		$result = $wpdb->query(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"DELETE FROM `{$wpdb->prefix}{$table_name}` WHERE updated < DATE_SUB(NOW(), INTERVAL 24 HOUR)"
 		);
 
@@ -151,6 +153,7 @@ final class TaskResult {
 		// Get the tasks with processing status and updated more than 2 hours
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_name = %s AND  success = 0", $task_name
 			)
 		);
@@ -170,6 +173,7 @@ final class TaskResult {
 		// Get the tasks with processing status and updated more than 2 hours
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_name = %s AND  success = 1", $task_name
 			)
 		);
@@ -186,6 +190,7 @@ final class TaskResult {
 
 		// Get the tasks with processing status and updated more than 2 hours
 		$results = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE success = 0"
 		);
 

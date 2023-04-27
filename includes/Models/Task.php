@@ -178,6 +178,7 @@ final class Task {
 		if ( $id ) {
 			// Get and populate the task with the required stuff
 			$task = $wpdb->get_row(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$wpdb->prepare( "select * from `{$wpdb->prefix}{$table_name}` where `task_id` = %d", $id )
 			);
 			// Populate the task details from what we got
@@ -304,7 +305,9 @@ final class Task {
 
 		$required_tasks = $wpdb->get_results(
 			$wpdb->prepare(
-				"select * from `{$wpdb->prefix}{$table_name}` where task_name = %s", $task_name
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"select * from `{$wpdb->prefix}{$table_name}` where task_name = %s",
+				$task_name
 			)
 		);
 
@@ -320,6 +323,7 @@ final class Task {
 
 		// Get the tasks with processing status and updated more than 2 hours
 		$stuck_tasks = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"SELECT * FROM `{$wpdb->prefix}{$table_name}` WHERE task_status = \'processing\' AND updated < DATE_SUB(NOW(), INTERVAL 10 MINUTE)"
 		);
 

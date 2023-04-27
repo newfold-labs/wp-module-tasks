@@ -3,7 +3,6 @@
 namespace NewfoldLabs\WP\Module\Tasks;
 
 use NewfoldLabs\WP\ModuleLoader\Container;
-use NewfoldLabs\WP\Module\Tasks\Models\Models;
 use NewfoldLabs\WP\Module\Tasks\Scheduler;
 use NewfoldLabs\WP\Module\Tasks\Models\Task;
 use NewfoldLabs\WP\Module\Tasks\Models\TaskResult;
