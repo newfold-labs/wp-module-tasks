@@ -46,7 +46,7 @@ class Tasks {
 		try {
 			$task->execute();
 			new TaskResult( $task->task_id, $task->task_name, null, null, true );
-		} catch ( \Exception $exception ) {
+		} catch ( \Throwable $exception ) {
 			new TaskResult(
 				$task->task_id,
 				$task->task_name,

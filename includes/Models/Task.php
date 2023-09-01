@@ -212,7 +212,7 @@ final class Task {
 					'args'          => wp_json_encode( $this->args ),
 					'num_retries'   => $this->num_retries,
 					'task_interval' => $this->task_interval,
-					'task_priority' => $this->task_priority || 10,
+					'task_priority' => null !== $this->task_priority ? $this->task_priority : 10,
 					'enabled'       => $this->enabled ? 1 : 0,
 					'task_status'   => 'queued',
 				)
