@@ -6,6 +6,23 @@ height="42" />
 # WordPress Tasks Module
 A task system for processing asynchronous tasks with wordpress, the tasks could be one-off long running tasks or periodic tasks.
 
+## Module Responsibilities
+
+- Define structures for both one-off and periodic tasks, including necessary parameters such as priority and task type.
+- Maintain a queue of pending tasks in database.
+- Provide interfaces for adding, updating, and removing tasks.
+- Handle task prioritization to ensure that tasks are executed in the order of their priority.
+- Implement scheduling mechanisms for both one-off and periodic tasks, ensuring timely execution according to predefined schedules.
+- Execute one-off and periodic tasks asynchronously in the background, allowing the system to continue processing tasks without blocking.
+- Remove completed tasks from the system after execution to maintain efficiency and prevent unnecessary resource usage.
+
+
+## Critical Paths
+
+- When a one-off or periodic task is scheduled, the scheduler component is responsible for picking up tasks based on their priority.
+- The scheduler initiates the execution of tasks, ensuring that they are processed in the correct order.
+- If a task fails during execution, the scheduler handles retries according to predefined policies, ensuring that tasks are eventually completed successfully.
+ 
 
 ## Installation
 
