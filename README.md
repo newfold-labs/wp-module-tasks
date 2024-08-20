@@ -38,7 +38,7 @@ A task system for processing asynchronous tasks with wordpress, the tasks could 
  composer require newfold-labs/wp-module-tasks
  ```
 
-[More on NewFold WordPress Modules](https://github.com/newfold-labs/wp-module-loader)
+[More on Newfold WordPress Modules](https://github.com/newfold-labs/wp-module-loader)
 
 ## Tasks
 
