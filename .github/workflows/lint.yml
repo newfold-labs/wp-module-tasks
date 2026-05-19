@@ -24,8 +24,8 @@ jobs:
     name: Run PHP Code Sniffer
     runs-on: ubuntu-latest
     permissions:
-      contents: read      # Required to clone the repo.
-    timeout-minutes: 30
+      contents: read # Required to checkout the repo.
+    timeout-minutes: 10
     steps:
 
       - name: Checkout
