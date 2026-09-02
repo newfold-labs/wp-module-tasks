@@ -22,7 +22,8 @@
     "newfold-labs/wp-module-loader": "^1.0.12"
   },
   "require-dev": {
-    "newfold-labs/wp-php-standards": "@stable"
+    "newfold-labs/wp-php-standards": "@stable",
+    "wp-cli/i18n-command": "^2.7.0"
   },
   "autoload": {
     "psr-4": {
@@ -38,11 +39,36 @@
     ],
     "lint": [
       "vendor/bin/phpcs --standard=phpcs.xml -s ."
+    ],
+    "i18n-pot": "vendor/bin/wp i18n make-pot . ./languages/wp-module-tasks.pot --domain=wp-module-tasks --headers='{\"Report-Msgid-Bugs-To\":\"https://github.com/newfold-labs/wp-module-tasks/issues\",\"POT-Creation-Date\":\"2025-02-13T09:55:55+00:00\"}' --exclude=tests,vendor,wordpress,node_modules",
+    "i18n-po": "vendor/bin/wp i18n update-po ./languages/wp-module-tasks.pot ./languages",
+    "i18n-php": "vendor/bin/wp i18n make-php ./languages --pretty-print",
+    "i18n-json": "rm -f languages/*.json && vendor/bin/wp i18n make-json ./languages --pretty-print",
+    "i18n": [
+      "@i18n-pot",
+      "@i18n-po",
+      "@i18n-php",
+      "@i18n-json"
+    ],
+    "i18n-ci-pre": [
+      "@i18n-pot",
+      "@i18n-po"
+    ],
+    "i18n-ci-post": [
+      "@i18n-json",
+      "@i18n-php"
     ]
   },
   "scripts-descriptions": {
     "fix": "Automatically fix coding standards issues where possible.",
-    "lint": "Check files against coding standards."
+    "lint": "Check files against coding standards.",
+    "i18n-pot": "Scan source and generate the POT translation template using wp i18n make-pot.",
+    "i18n-po": "Update PO files from the POT file using wp i18n update-po.",
+    "i18n-php": "Generate PHP translation files from PO files using wp i18n make-php.",
+    "i18n-json": "Remove stale JSON catalogs, then generate JED JSON from PO files using wp i18n make-json.",
+    "i18n": "Run the full local i18n pipeline (POT, PO, PHP, JSON).",
+    "i18n-ci-pre": "CI: regenerate the POT file and sync PO catalogs from it.",
+    "i18n-ci-post": "CI: regenerate JED JSON and PHP translation files from PO catalogs."
   },
   "config": {
     "allow-plugins": {
