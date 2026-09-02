@@ -76,7 +76,7 @@ if ( function_exists( 'add_action' ) ) {
 			register(
 				[
 					'name'     => 'tasks',
-					'label'    => __( 'Tasks', 'newfold-tasks-module' ),
+					'label'    => __( 'Tasks', 'wp-module-tasks' ),
 					'callback' => function ( Container $container ) {
 						new Tasks( $container );
 					},

@@ -234,7 +234,7 @@ final class Task {
 	 */
 	public function execute() {
 		if ( ! is_callable( $this->task_execute ) ) {
-			throw new \Exception( 'Unable to load task' );
+			throw new \Exception( __( 'Unable to load task', 'wp-module-tasks' ) );
 		}
 
 		call_user_func( $this->task_execute, $this->args );
@@ -255,7 +255,11 @@ final class Task {
 	public function add_interval_schedule() {
 		$interval = $this->task_interval;
 		$key      = "{$interval}_seconds";
-		$message  = "Once every {$interval} seconds";
+		$message  = sprintf(
+			/* translators: %d: number of seconds between cron runs. */
+			__( 'Once every %d seconds', 'wp-module-tasks' ),
+			$interval
+		);
 
 		$current_schedules = get_option( 'wp_module_tasks_schedules', array() );
 

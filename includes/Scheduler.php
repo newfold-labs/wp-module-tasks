@@ -43,7 +43,7 @@ class Scheduler {
 		if ( ! array_key_exists( 'twenty_seconds', $schedules ) || 20 !== $schedules['twenty_seconds']['interval'] ) {
 			$schedules['twenty_seconds'] = array(
 				'interval' => 20,
-				'display'  => __( 'Cron to run once every twenty seconds' ),
+				'display'  => __( 'Cron to run once every twenty seconds', 'wp-module-tasks' ),
 			);
 		}
 
@@ -51,7 +51,7 @@ class Scheduler {
 		if ( ! array_key_exists( 'ten_minutes', $schedules ) || 600 !== $schedules['ten_minutes']['interval'] ) {
 			$schedules['ten_minutes'] = array(
 				'interval' => 600,
-				'display'  => __( 'Cron to run once every ten minutes' ),
+				'display'  => __( 'Cron to run once every ten minutes', 'wp-module-tasks' ),
 			);
 		}
 
@@ -66,7 +66,7 @@ class Scheduler {
 	 */
 	private function record_and_requeue( $task, $exception = null ) {
 		if ( ! $exception ) {
-			$message = 'Task aborted due to timeout';
+			$message = __( 'Task aborted due to timeout', 'wp-module-tasks' );
 		} else {
 			$message = $exception->getMessage() . $exception->getTraceAsString();
 		}
