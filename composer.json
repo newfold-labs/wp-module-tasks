@@ -22,7 +22,7 @@
     "newfold-labs/wp-module-loader": "^1.0.12"
   },
   "require-dev": {
-    "newfold-labs/wp-php-standards": "@stable",
+    "newfold-labs/wp-php-standards": "^2.0",
     "wp-cli/i18n-command": "^2.7.0"
   },
   "autoload": {
